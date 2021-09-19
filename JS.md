@@ -20,34 +20,76 @@ console(str1.split('.'))  // ["aaaaa"]
 ### 3.apply
 
 ```js
-// 1.简单使用
-var person = {
-    fullName: function() {
-        return this.firstName + " " + this.lastName;
-    }
+fun.apply(thisArg, [param1,param2,...])
+/*
+	1.thisArg:
+		1.fun的this指向thisArg对象
+         2.非严格模式下：thisArg指定为null，undefined，fun中的this指向window对象.
+         3.严格模式下：fun的this为undefined
+         4.值为原始值(数字，字符串，布尔值)的this会指向该原始值的自动包装对象，如 String、Number、Boolean
+    2.param1,param2:
+     	1.如果param不传或为 null/undefined，则表示不需要传入任何参数.
+	    2.apply第二个参数为数组，数组内的值为传给fun的参数。
+	3.如何不弄混这个apply和call
+	    1.apply是以a开头，它传给fun的参数是Array，也是以a开头的。
+调用apply的必须是一个函数
+	4.bind / call与apply 的区别：
+		1.call/apply改变了函数的this上下文后马上执行该函数
+		2.bind则是返回改变了上下文后的函数,不执行该函数
+		3.call/apply 返回fun的执行结果
+		4.bind返回fun的拷贝，并指定了fun的this指向，保存了fun的参数。
+*/
+// 1.常用判断类型
+function isType(data, type) {
+   const typeObj = {
+      '[object String]': 'string',
+      '[object Number]': 'number',
+      '[object Boolean]': 'boolean',
+      '[object Null]': 'null',
+      '[object Undefined]': 'undefined',
+      '[object Object]': 'object',
+      '[object Array]': 'array',
+      '[object Function]': 'function',
+      '[object Date]': 'date', // Object.prototype.toString.call(new Date())
+      '[object RegExp]': 'regExp',
+      '[object Map]': 'map',
+      '[object Set]': 'set',
+      '[object HTMLDivElement]': 'dom', // document.querySelector('#app')
+      '[object WeakMap]': 'weakMap',
+      '[object Window]': 'window',  // Object.prototype.toString.call(window)
+      '[object Error]': 'error', // new Error('1')
+      '[object Arguments]': 'arguments',
+   }
+   let name = Object.prototype.toString.call(data) // 借用Object.prototype.toString()获取数据类型
+   let typeName = typeObj[name] || '未知类型' // 匹配数据类型
+   return typeName === type // 判断该数据类型是否为传入的类型
 }
-var person1 = {
-    firstName: "Bill",
-    lastName: "Gates",
+console.log(
+        isType({}, 'object'), // true
+        isType([], 'array'), // true
+        isType(new Date(), 'object'), // false
+        isType(new Date(), 'date'), // true
+)
+// 常用2 往类数组中添加元素 借用Array的方法push
+var arrayLike = {
+   0: 'OB',
+   1: 'Koro1',
+   length: 2
 }
-person.fullName.apply(person1);  // 将返回 "Bill Gates"
+Array.prototype.push.call(arrayLike, '添加元素1', '添加元素2');
+console.log(arrayLike) // {"0":"OB","1":"Koro1","2":"添加元素1","3":"添加元素2","length":4}
 
-// 2.传数组的方式
-var person = {
-  fullName: function(city, country) {
-    return this.firstName + " " + this.lastName + "," + city + "," + country;
-  }
-}
-var person1 = {
-  firstName:"John",
-  lastName: "Doe"
-}
-person.fullName.apply(person1, ["Oslo", "Norway"]);
+// 常用3 一个数组中的最大值 Math.max方法接收数组是不管用的只能这么接收 Math.max(1,2,3)
+let arra1 = [1,19,0,20,22]
+const amax = Math.max.apply(Math,arra1)
+console.log(amax)
 
-
-// 打印的话 会打印 John Doe,Oslo,Norway
-// 如果给 apply传递参数是数组的话 它会一一对应你设置的形参并且传入到方法中
-// city -> Oslo  country -> Norway
+// call 与 apply 用哪个？
+/*
+	参数数量/顺序确定就用call，参数数量/顺序不确定的话就用apply。
+	考虑可读性：参数数量不多就用call，参数数量比较多的话，把参数整合成数组，使用apply。
+	参数集合已经是一个数组的情况，用apply，比如上文的获取数组最大值/最小值。
+*/
 ```
 
 ### 4.then()的使用
